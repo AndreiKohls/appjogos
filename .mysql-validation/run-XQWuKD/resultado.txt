@@ -1,0 +1,13 @@
+Validação MySQL real isolada: PASSOU
+Instância com --no-defaults, dados próprios, bind 127.0.0.1 e porta diferente de 3306.
+Segredo JWT e credenciais das contas adicionais gerados somente em memória; tokens e hashes não registrados.
+As duas contas demonstrativas do SQL usam as credenciais públicas documentadas para a aula.
+SQL real importado duas vezes: 6 produtos e 2 usuários demonstrativos, sem duplicidade; hashes bcrypt custo 10 válidos.
+Reimportação preservou ID, nome, senha e nível das contas existentes, incluindo uma conta alterada.
+Script criarAdmin executado duas vezes: criado, depois já cadastrado.
+Contas do SQL: ambos os logins e /auth/me válidos; usuário consulta e recebe 403 na administração; admin cria/exclui produto e lista usuários.
+Cadastro ignora admin, duplicado 409, login inválido 401, JWT 2h sem senha, /me válido.
+Matriz real: sem token 401; usuário consulta 200 e administração 403.
+Administrador: POST 201, GET 200, PUT 200 (incluindo sem mudanças), DELETE 200 e depois 404.
+Usuários: listagem sem senha, próprio nível 400, nível inválido 400, promoção e rebaixamento imediatos.
+Processos filhos da API e do MySQL encerrados ao final.
