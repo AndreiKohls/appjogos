@@ -1,3 +1,107 @@
+# GameHub
+
+## Visão geral do site
+
+O GameHub é uma plataforma web/mobile para gamers que querem encontrar partidas, montar equipes e acompanhar jogos populares em um único ambiente. A ideia é conectar pessoas com interesses parecidos, favorecendo o encontro entre jogadores de FPS, MOBAs, jogos criativos e partidas casuais.
+
+O site foi pensado para facilitar três ações principais:
+
+- cadastro e login de usuários;
+- visualização de jogos e partidas disponíveis;
+- formação de equipes para jogar junto.
+
+A experiência de uso é simples: o usuário cria sua conta, entra na plataforma e acessa o painel principal, onde vê jogos populares e partidas em destaque. A partir dali, pode explorar eventos, entrar em partidas abertas, acompanhar as atrações do dia e se conectar com outros jogadores.
+
+## Como o site funciona
+
+### 1. Cadastro e autenticação
+O visitante pode criar uma conta informando nome, nome de usuário, e-mail e senha. A API valida os campos antes de salvar o usuário, e a senha nunca é devolvida ao cliente. Ao fazer login, o sistema gera um token JWT para autenticar as ações seguintes, como listar partidas, entrar em equipes e gerenciar favoritos.
+
+### 2. Dashboard principal
+Após autenticar, o usuário entra em uma tela inicial com mensagem de boas-vindas, jogos populares e partidas disponíveis. Essa tela funciona como central de navegação da aplicação, conectando o usuário às principais áreas do GameHub.
+
+### 3. Partidas e eventos
+A plataforma lista partidas em aberto com informações como nome do jogo, título da partida, horário, número de jogadores e criador da sessão. O usuário pode ver detalhes ou participar diretamente.
+
+### 4. Equipes e comunidade
+Além das partidas, o aplicativo permite formar ou participar de equipes. Esse recurso valoriza a experiência social do jogo, pois o usuário consegue encontrar pessoas para jogar em comunhão, trocar estratégias e criar grupos permanentes.
+
+### 5. Favoritos e personalização
+Os jogadores também podem marcar jogos como favoritos, criando uma experiência mais personalizada. Isso ajuda a destacar os títulos que o usuário mais usa ou mais gosta, deixando o acesso mais rápido e eficiente.
+
+### 6. Segurança e permissões
+A API usa autenticação por JWT, validação de dados e controle de acesso. Usuários comuns têm acesso ao seu perfil e às operações pessoais, enquanto administradores podem gerenciar usuários e ações sensíveis. Isso mantém o sistema organizado e evita que qualquer pessoa modifique dados que não lhe pertencem.
+
+## Objetivo educacional do projeto
+
+Este projeto foi desenvolvido como atividade didática para aprender:
+
+- autenticação com JWT;
+- uso de Express para criar APIs REST;
+- validação de dados no backend;
+- uso de bcrypt para proteger senhas;
+- controle de acesso por perfil de usuário;
+- persistência de dados com MySQL;
+- consumo da API em um aplicativo React Native/Expo.
+
+## Tecnologias usadas
+
+- React Native + Expo
+- React Navigation
+- JavaScript ES Modules
+- Express
+- MySQL
+- mysql2/promise
+- bcryptjs
+- jsonwebtoken
+- AsyncStorage para manter sessão do usuário
+
+## Estrutura geral
+
+- `App.js`: controla a navegação e a sessão do usuário
+- `screens/`: telas do aplicativo
+- `components/`: componentes visuais reutilizáveis
+- `services/api.js`: conexão com a API
+- `backend/app.js`: inicialização da API
+- `backend/controllers/`: lógica dos endpoints
+- `backend/routes/`: rotas da aplicação
+- `backend/middlewares/`: autenticação e autorização
+- `backend/database/schema.sql`: estrutura do banco de dados
+
+## Como rodar o projeto
+
+1. Instale as dependências:
+
+```bash
+npm install
+```
+
+2. Configure as variáveis de ambiente do backend em `backend/.env` conforme o exemplo de `backend/.env.example`.
+
+3. Inicie a API:
+
+```bash
+npm run api
+```
+
+4. Inicie o app Expo:
+
+```bash
+npm start
+```
+
+5. Acesse o app em navegador ou em dispositivo físico conectado ao mesmo ambiente local.
+
+## Explicação da atividade em aula
+
+O GameHub foi construído para mostrar, na prática, como um sistema real de rede social gamer funciona. Ele não é só uma interface bonita: ele reúne autenticação, proteção de dados, permissões e integração com banco de dados, demonstrando o fluxo completo de uma aplicação moderna.
+
+Na prática, a atividade ensina como a senha é armazenada com hash, como o login gera um token e como as rotas protegidas só podem ser acessadas por usuários autorizados. Também mostra que não basta esconder botões: a validação real precisa acontecer no backend, porque qualquer pessoa pode tentar chamar a API diretamente.
+
+Esse tipo de projeto ajuda a compreender a diferença entre front-end e back-end, a importância da segurança e o papel das ferramentas de autenticação e autorização no desenvolvimento de software.
+
+---
+
 # LOJA JWT
 
 Projeto didático para o 3º ano do Ensino Médio Técnico: uma loja simples usada para estudar **cadastro, login, hash de senha, JWT, autenticação e autorização**. O usuário consulta produtos; o administrador também cadastra, edita, exclui e gerencia níveis de usuários.

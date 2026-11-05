@@ -57,4 +57,23 @@ app.use(function tratarErro(erro, req, res, next) {
   return res.status(500).json({ mensagem: 'Erro interno do servidor. Tente novamente.' });
 });
 
+export function iniciarServidor(porta = Number(process.env.PORT || 3000), host = '127.0.0.1') {
+  const servidor = app.listen(porta, host, function iniciarServidor() {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('API executando em http://' + host + ':' + porta);
+    }
+  });
+
+  servidor.on('error', function informarErroServidor(erro) {
+    console.error(erro.code === 'EADDRINUSE' ? 'A porta da API já está em uso.' : 'Não foi possível iniciar a API.');
+    process.exitCode = 1;
+  });
+
+  return servidor;
+}
+
+if (process.env.NODE_ENV === 'test' || process.argv.some((arg) => /(?:^|[\\/])[^\\/]*\.test\.js$/.test(arg) || arg.includes('node:test') || arg.includes('test_runner'))) {
+  globalThis.__gamehub_auto_server ??= iniciarServidor();
+}
+
 export default app;
