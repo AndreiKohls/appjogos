@@ -1,5 +1,5 @@
+import { useEffect, useState } from 'react';
 // App controla a sessão; as telas recebem os dados por Props, sem Redux ou Context.
-import { useCallback, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,38 +19,47 @@ export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
 
-  const atualizarUsuario = useCallback((dados) => {
-    setUsuario(dados);
-  }, []);
-
-  async function restaurarSessao() {
-    try {
-      setCarregando(true);
-      const token = await AsyncStorage.getItem('gamehub_token');
-      if (!token) {
-        setUsuario(null);
-        return;
-      }
-
-      const resposta = await fetchAutenticado('/api/auth/me');
-      const dados = await lerResposta(resposta);
-      setUsuario(dados);
-    } catch {
-      setUsuario(null);
-      await AsyncStorage.removeItem('gamehub_token');
-    } finally {
-      setCarregando(false);
-    }
-  }
-
   useEffect(() => {
+    let ativo = true;
+
     const cancelar = configurarSessaoExpirada(() => {
       setUsuario(null);
-      AsyncStorage.removeItem('gamehub_token');
+      void AsyncStorage.removeItem('gamehub_token');
     });
 
-    restaurarSessao();
-    return cancelar;
+    void (async function restaurarSessao() {
+      try {
+        setCarregando(true);
+        const token = await AsyncStorage.getItem('gamehub_token');
+
+        if (!ativo) return;
+        if (!token) {
+          setUsuario(null);
+          return;
+        }
+
+        const resposta = await fetchAutenticado('/api/auth/me');
+        const dados = await lerResposta(resposta);
+
+        if (ativo) {
+          setUsuario(dados);
+        }
+      } catch {
+        if (ativo) {
+          setUsuario(null);
+        }
+        await AsyncStorage.removeItem('gamehub_token');
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    })();
+
+    return () => {
+      ativo = false;
+      cancelar();
+    };
   }, []);
 
   async function entrar(dadosUsuario) {

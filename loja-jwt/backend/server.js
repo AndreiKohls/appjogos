@@ -1,4 +1,4 @@
-import app, { iniciarServidor } from './app.js';
+import { iniciarServidor } from './app.js';
 import validarAmbiente from './config/ambiente.js';
 
 try {
