@@ -11,6 +11,8 @@ import Login from './screens/Login.js';
 import CadastroUsuario from './screens/CadastroUsuario.js';
 import Home from './screens/Home.js';
 import Partidas from './screens/Partidas.js';
+import NovaPartida from './screens/NovaPartida.js';
+import DetalhesPartida from './screens/DetalhesPartida.js';
 import { fetchAutenticado, lerResposta, configurarSessaoExpirada } from './services/api.js';
 
 const Stack = createNativeStackNavigator();
@@ -103,6 +105,8 @@ export default function App() {
                 {(props) => <Home {...props} usuario={usuario} sair={sair} />}
               </Stack.Screen>
               <Stack.Screen name="Partidas" options={{ title: 'Partidas' }} component={Partidas} />
+              <Stack.Screen name="NovaPartida" options={{ title: 'Nova partida' }} component={NovaPartida} />
+              <Stack.Screen name="DetalhesPartida" options={{ title: 'Detalhes da partida' }} component={DetalhesPartida} />
             </>
           )}
         </Stack.Navigator>

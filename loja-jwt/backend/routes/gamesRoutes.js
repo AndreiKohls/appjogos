@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { listarJogos, buscarJogoPorId, criarJogo, atualizarJogo, excluirJogo } from '../controllers/gamesController.js';
-import autenticarToken from '../middlewares/autenticarToken.js';
-import somenteAdmin from '../middlewares/somenteAdmin.js';
+import autenticarTokenGameHub from '../middlewares/autenticarTokenGameHub.js';
+import somenteAdminGameHub from '../middlewares/somenteAdminGameHub.js';
 
 const router = Router();
 
-router.get('/', autenticarToken, listarJogos);
-router.get('/:id', autenticarToken, buscarJogoPorId);
-router.post('/', autenticarToken, somenteAdmin, criarJogo);
-router.put('/:id', autenticarToken, somenteAdmin, atualizarJogo);
-router.delete('/:id', autenticarToken, somenteAdmin, excluirJogo);
+router.get('/', autenticarTokenGameHub, listarJogos);
+router.get('/:id', autenticarTokenGameHub, buscarJogoPorId);
+router.post('/', autenticarTokenGameHub, somenteAdminGameHub, criarJogo);
+router.put('/:id', autenticarTokenGameHub, somenteAdminGameHub, atualizarJogo);
+router.delete('/:id', autenticarTokenGameHub, somenteAdminGameHub, excluirJogo);
 
 export default router;
