@@ -8,7 +8,7 @@ export default function Partidas({ navigation }) {
   const [partidas, setPartidas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
-  const [participando, setParticipando] = useState({});
+  const [usuarioId, setUsuarioId] = useState(null);
 
   const carregarPartidas = useCallback(async () => {
     setCarregando(true);
@@ -25,6 +25,16 @@ export default function Partidas({ navigation }) {
 
       const dados = await lerResposta(resposta);
       setPartidas(Array.isArray(dados) ? dados : []);
+
+      const usuario = await fetch(API + '/api/auth/me', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + (token || ''),
+        },
+      });
+
+      const usuarioDados = await lerResposta(usuario);
+      setUsuarioId(Number(usuarioDados.id));
     } catch (falha) {
       setErro(falha.message || 'Não foi possível carregar as partidas.');
     } finally {
@@ -33,7 +43,18 @@ export default function Partidas({ navigation }) {
   }, []);
 
   useEffect(() => {
-    void carregarPartidas();
+    let ativo = true;
+
+    const iniciar = async () => {
+      await carregarPartidas();
+      if (!ativo) return;
+    };
+
+    void iniciar();
+
+    return () => {
+      ativo = false;
+    };
   }, [carregarPartidas]);
 
   async function participar(partidaId) {
@@ -48,7 +69,6 @@ export default function Partidas({ navigation }) {
       });
 
       const dados = await lerResposta(resposta);
-      setParticipando((estado) => ({ ...estado, [partidaId]: true }));
       setErro('');
       alert(dados.mensagem || 'Você entrou na partida!');
       await carregarPartidas();
@@ -83,7 +103,8 @@ export default function Partidas({ navigation }) {
         partidas.map((partida) => {
           const participantes = Number(partida.current_players || 0);
           const max = Number(partida.max_players || 0);
-          const jaParticipa = !!participando[partida.id];
+          const jaParticipa = Number(partida.is_participant) === 1 || Number(partida.creator_id) === Number(usuarioId);
+          const ehCriador = Number(partida.creator_id) === Number(usuarioId);
 
           return (
             <Cartao key={partida.id} style={css.cardPartida}>
@@ -94,7 +115,11 @@ export default function Partidas({ navigation }) {
               <Text style={css.meta}>👤 Criador: {partida.creator_name || 'Anônimo'}</Text>
               <View style={css.acoes}>
                 <Botao titulo="Detalhes" variante="secundario" onPress={() => abrirDetalhes(partida)} />
-                <Botao titulo={jaParticipa ? 'Participando' : 'Participar'} onPress={() => participar(partida.id)} disabled={jaParticipa} />
+                <Botao
+                  titulo={jaParticipa ? (ehCriador ? 'Criador' : 'Participando') : 'Participar'}
+                  onPress={() => participar(partida.id)}
+                  disabled={jaParticipa}
+                />
               </View>
             </Cartao>
           );

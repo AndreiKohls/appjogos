@@ -10,7 +10,7 @@ export default function NovaPartida({ navigation }) {
   const [jogoId, setJogoId] = useState('');
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
-  const [maxJogadores, setMaxJogadores] = useState('');
+  const [maxJogadores, setMaxJogadores] = useState('5');
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -37,10 +37,11 @@ export default function NovaPartida({ navigation }) {
         }
 
         const dados = await resposta.json();
-        setJogos(Array.isArray(dados) ? dados : []);
+        const lista = Array.isArray(dados) ? dados : [];
+        setJogos(lista);
 
-        if (Array.isArray(dados) && dados.length > 0 && !jogoId) {
-          setJogoId(String(dados[0].id));
+        if (lista.length > 0 && !jogoId) {
+          setJogoId(String(lista[0].id));
         }
       } catch {
         setErro('Não foi possível carregar a lista de jogos.');
@@ -119,7 +120,7 @@ export default function NovaPartida({ navigation }) {
       setJogoId(jogos[0]?.id ? String(jogos[0].id) : '');
       setData('');
       setHora('');
-      setMaxJogadores('');
+      setMaxJogadores('5');
       setTimeout(() => navigation.goBack(), 700);
     } catch (falha) {
       setErro(falha.message || 'Não foi possível criar a partida.');

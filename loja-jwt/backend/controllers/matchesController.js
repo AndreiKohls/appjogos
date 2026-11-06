@@ -2,14 +2,26 @@ import pool from '../database/conexao.js';
 
 export async function listarPartidas(req, res) {
   try {
+    const usuarioId = Number(req.usuario?.id || 0);
     const [partidas] = await pool.execute(
       `SELECT m.id, m.title, m.description, m.game_id, g.name AS game_name, m.creator_id, u.name AS creator_name,
               m.match_date, m.max_players, m.status, m.created_at,
-              (SELECT COUNT(*) FROM match_players mp WHERE mp.match_id = m.id) AS current_players
+              (
+                SELECT COUNT(*)
+                FROM match_players mp
+                WHERE mp.match_id = m.id
+              ) AS current_players,
+              CASE
+                WHEN EXISTS (
+                  SELECT 1 FROM match_players mp2 WHERE mp2.match_id = m.id AND mp2.user_id = ?
+                ) THEN 1
+                ELSE 0
+              END AS is_participant
        FROM matches m
        INNER JOIN games g ON g.id = m.game_id
        INNER JOIN users u ON u.id = m.creator_id
-       ORDER BY m.match_date ASC`
+       ORDER BY m.match_date ASC`,
+      [usuarioId]
     );
 
     return res.status(200).json(partidas);
@@ -25,15 +37,26 @@ export async function buscarPartidaPorId(req, res) {
   }
 
   try {
+    const usuarioId = Number(req.usuario?.id || 0);
     const [partidas] = await pool.execute(
       `SELECT m.id, m.title, m.description, m.game_id, g.name AS game_name, m.creator_id, u.name AS creator_name,
               m.match_date, m.max_players, m.status, m.created_at,
-              (SELECT COUNT(*) FROM match_players mp WHERE mp.match_id = m.id) AS current_players
+              (
+                SELECT COUNT(*)
+                FROM match_players mp
+                WHERE mp.match_id = m.id
+              ) AS current_players,
+              CASE
+                WHEN EXISTS (
+                  SELECT 1 FROM match_players mp2 WHERE mp2.match_id = m.id AND mp2.user_id = ?
+                ) THEN 1
+                ELSE 0
+              END AS is_participant
        FROM matches m
        INNER JOIN games g ON g.id = m.game_id
        INNER JOIN users u ON u.id = m.creator_id
        WHERE m.id = ?`,
-      [id]
+      [usuarioId, id]
     );
 
     if (partidas.length === 0) {
@@ -80,6 +103,11 @@ export async function criarPartida(req, res) {
       [titulo, descricao, jogoId, req.usuario.id, match_date, maximo, 'aberta']
     );
 
+    await pool.execute(
+      'INSERT INTO match_players (match_id, user_id) VALUES (?, ?)',
+      [resultado.insertId, req.usuario.id]
+    );
+
     return res.status(201).json({
       mensagem: 'Partida criada com sucesso.',
       partida: {
@@ -95,65 +123,6 @@ export async function criarPartida(req, res) {
     });
   } catch {
     return res.status(500).json({ mensagem: 'Não foi possível criar a partida.' });
-  }
-}
-
-export async function atualizarPartida(req, res) {
-  const partidaId = Number(req.params.id);
-  const { title, description, game_id, match_date, max_players, status } = req.body;
-
-  if (!Number.isInteger(partidaId) || partidaId <= 0) {
-    return res.status(400).json({ mensagem: 'ID da partida inválido.' });
-  }
-
-  try {
-    const [partidas] = await pool.execute('SELECT * FROM matches WHERE id = ?', [partidaId]);
-    if (partidas.length === 0) {
-      return res.status(404).json({ mensagem: 'Partida não encontrada.' });
-    }
-
-    if (Number(partidas[0].creator_id) !== Number(req.usuario.id) && req.usuario.role !== 'admin') {
-      return res.status(403).json({ mensagem: 'Você só pode editar suas próprias partidas.' });
-    }
-
-    const titulo = typeof title === 'string' ? title.trim() : partidas[0].title;
-    const descricao = typeof description === 'string' ? description.trim() : partidas[0].description;
-    const jogoId = Number(game_id) || Number(partidas[0].game_id);
-    const data = match_date || partidas[0].match_date;
-    const maximo = Number(max_players) || Number(partidas[0].max_players);
-    const estado = ['aberta', 'em_andamento', 'encerrada'].includes(status) ? status : partidas[0].status;
-
-    await pool.execute(
-      'UPDATE matches SET title = ?, description = ?, game_id = ?, match_date = ?, max_players = ?, status = ? WHERE id = ?',
-      [titulo, descricao, jogoId, data, maximo, estado, partidaId]
-    );
-
-    return res.status(200).json({ mensagem: 'Partida atualizada com sucesso.' });
-  } catch {
-    return res.status(500).json({ mensagem: 'Não foi possível atualizar a partida.' });
-  }
-}
-
-export async function excluirPartida(req, res) {
-  const partidaId = Number(req.params.id);
-  if (!Number.isInteger(partidaId) || partidaId <= 0) {
-    return res.status(400).json({ mensagem: 'ID da partida inválido.' });
-  }
-
-  try {
-    const [partida] = await pool.execute('SELECT creator_id FROM matches WHERE id = ?', [partidaId]);
-    if (partida.length === 0) {
-      return res.status(404).json({ mensagem: 'Partida não encontrada.' });
-    }
-
-    if (Number(partida[0].creator_id) !== Number(req.usuario.id) && req.usuario.role !== 'admin') {
-      return res.status(403).json({ mensagem: 'Você só pode excluir suas próprias partidas.' });
-    }
-
-    await pool.execute('DELETE FROM matches WHERE id = ?', [partidaId]);
-    return res.status(200).json({ mensagem: 'Partida excluída com sucesso.' });
-  } catch {
-    return res.status(500).json({ mensagem: 'Não foi possível excluir a partida.' });
   }
 }
 
@@ -202,29 +171,5 @@ export async function entrarNaPartida(req, res) {
     return res.status(200).json({ mensagem: 'Você entrou na partida com sucesso.' });
   } catch {
     return res.status(500).json({ mensagem: 'Não foi possível entrar na partida.' });
-  }
-}
-
-export async function sairDaPartida(req, res) {
-  const partidaId = Number(req.params.id);
-  const usuarioId = Number(req.usuario.id);
-
-  if (!Number.isInteger(partidaId) || partidaId <= 0) {
-    return res.status(400).json({ mensagem: 'ID da partida inválido.' });
-  }
-
-  try {
-    const [resultado] = await pool.execute(
-      'DELETE FROM match_players WHERE match_id = ? AND user_id = ?',
-      [partidaId, usuarioId]
-    );
-
-    if (resultado.affectedRows === 0) {
-      return res.status(404).json({ mensagem: 'Você não participa desta partida.' });
-    }
-
-    return res.status(200).json({ mensagem: 'Você saiu da partida com sucesso.' });
-  } catch {
-    return res.status(500).json({ mensagem: 'Não foi possível sair da partida.' });
   }
 }
