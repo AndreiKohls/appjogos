@@ -79,6 +79,10 @@ const css = StyleSheet.create({
   banner: {
     backgroundColor: '#141C2F',
     borderColor: '#2D3B5E',
+    shadowColor: '#4F46E5',
+    shadowOpacity: 0.25,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
   },
   descricao: {
     color: Cores.textoSecundario,

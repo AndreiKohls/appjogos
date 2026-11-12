@@ -71,7 +71,7 @@ export default function Home({ navigation, usuario, sair }) {
 
   return (
     <Pagina>
-      <Cartao>
+      <Cartao style={css.heroCard}>
         <Text style={estilos.etiqueta}>Dashboard</Text>
         <Text style={estilos.titulo}>Olá, {nomeUsuario}!</Text>
         <Text style={[estilos.subtitulo, css.subtitulo]}>Você está pronto para encontrar partidas e formar equipes.</Text>
@@ -97,7 +97,7 @@ export default function Home({ navigation, usuario, sair }) {
           ) : (
             partidasRecentes.map((partida) => (
               <View key={partida.id} style={css.partidaItem}>
-                <View>
+                <View style={css.partidaInfo}>
                   <Text style={css.partidaJogo}>{partida.game_name || 'Game'}</Text>
                   <Text style={css.partidaTitulo}>{partida.title}</Text>
                 </View>
@@ -120,6 +120,9 @@ export default function Home({ navigation, usuario, sair }) {
 }
 
 const css = StyleSheet.create({
+  heroCard: {
+    backgroundColor: 'linear-gradient(135deg, #1D4ED8 0%, #7C3AED 100%)',
+  },
   subtitulo: {
     marginTop: 8,
   },
@@ -161,6 +164,10 @@ const css = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  partidaInfo: {
+    flex: 1,
+    marginRight: 12,
   },
   partidaJogo: {
     color: Cores.ciano,

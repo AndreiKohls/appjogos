@@ -22,7 +22,11 @@ export const Cores = {
 export function Pagina({ children, incluirTopo = true }) {
   return (
     <SafeAreaView style={estilos.tela} edges={incluirTopo ? ['top', 'bottom', 'left', 'right'] : ['bottom', 'left', 'right']}>
-      <ScrollView contentContainerStyle={estilos.conteudo} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={estilos.conteudo}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {children}
       </ScrollView>
     </SafeAreaView>
@@ -41,7 +45,11 @@ export function Botao({ titulo, onPress = () => undefined, variante = 'primario'
       : estilos.botaoPerigo;
 
   return (
-    <Pressable onPress={onPress} disabled={disabled || carregando} style={({ pressed }) => [estilo, (pressed || disabled) && estilos.botaoOpcao]}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled || carregando}
+      style={({ pressed }) => [estilo, (pressed || disabled) && estilos.botaoOpcao]}
+    >
       {carregando ? <ActivityIndicator color="#FFF" size="small" /> : <Text style={estilos.textoBotao}>{titulo}</Text>}
     </Pressable>
   );
@@ -79,15 +87,22 @@ export const estilos = StyleSheet.create({
   },
   conteudo: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 32,
     gap: 18,
   },
   cartao: {
     backgroundColor: Cores.painel,
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: Cores.borda,
     padding: 18,
+    shadowColor: '#020817',
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
   },
   botaoPrimario: {
     backgroundColor: '#7C3AED',
@@ -97,9 +112,9 @@ export const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#7C3AED',
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
   },
   botaoSecundario: {
     backgroundColor: '#16233D',
