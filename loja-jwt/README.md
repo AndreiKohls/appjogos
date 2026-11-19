@@ -146,6 +146,93 @@ O foco não é apenas a interface visual, mas entender a lógica real por trás 
 - regras de negócio em backend;
 - relacionamento entre usuários, jogos e partidas.
 
-## Conclusão
+## Entrega 4 — versão final
 
-O GameHub funciona como um projeto completo de estudo, demonstrando como construir uma aplicação real com autenticação JWT, banco de dados e navegação de telas. Além de um produto funcional, ele serve como base para aprender os conceitos fundamentais de desenvolvimento full stack em JavaScript.
+Esta versão conclui o projeto GameHub com correções de navegação, autenticação, CRUD, interface e integração com API.
+
+### Requisitos implementados
+
+- cadastro público de usuários;
+- login com JWT válido por duas horas;
+- persistência da sessão com AsyncStorage;
+- logout e limpeza do token;
+- controle de permissões de usuário e administrador;
+- operações CRUD de produtos e partidas;
+- participação e saída de partidas;
+- equipes, favoritos e jogos integrados ao backend;
+- validação de dados no frontend e no backend;
+- mensagens de erro sem exposição de detalhes internos ou SQL;
+- documentação do banco em `backend/database/schema.sql`.
+
+### Versão final no Android
+
+Para o APK funcionar no celular, configure o endereço da API em `services/api.js` ou use uma variável pública do Expo:
+
+```env
+EXPO_PUBLIC_API_URL=http://SEU_IP_DA_REDE:3000
+```
+
+A API deve ser iniciada com:
+
+```bash
+npm run api
+```
+
+No celular Android, `localhost` e `127.0.0.1` apontam para o próprio celular. Use o endereço IPv4 do computador na rede local ou uma API publicada.
+
+### Testes e validações
+
+Execute os testes automatizados:
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run test:web
+```
+
+Antes da apresentação, confira:
+
+1. cadastro e login;
+2. navegação entre todas as telas;
+3. listagem e criação de partidas;
+4. participar e sair de partidas;
+5. CRUD autorizado pelo perfil correto;
+6. resposta 401 sem token;
+7. resposta 403 para usuário sem permissão;
+8. persistência da sessão após reiniciar o aplicativo;
+9. registros cadastrados no banco MySQL.
+
+### Segurança
+
+- senhas são armazenadas com bcrypt;
+- as rotas protegidas recebem `Authorization: Bearer <token>`;
+- o JWT contém o identificador do usuário e é assinado com `JWT_SECRET`;
+- os middlewares consultam o usuário atual no banco;
+- o cadastro público não permite definir perfil administrativo;
+- credenciais e arquivos `.env` não são versionados.
+
+### Gerar o APK
+
+Instale o EAS CLI e autentique-se:
+
+```bash
+npx eas-cli login
+npx eas-cli build:configure
+npx eas-cli build --platform android --profile preview
+```
+
+O APK gerado pelo perfil `preview` pode ser baixado do painel da Expo ou pelo link fornecido ao final do build. O código e o APK devem representar o mesmo commit da entrega final.
+
+### Entrega da apresentação
+
+Inclua no repositório ou material de apresentação:
+
+- link do repositório atualizado;
+- código-fonte completo;
+- estrutura SQL;
+- README;
+- histórico de commits;
+- resultados dos testes;
+- APK final;
+- roteiro para demonstração das funcionalidades.

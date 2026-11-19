@@ -21,6 +21,22 @@ export default function NovaPartida({ navigation }) {
     [jogos, jogoId]
   );
 
+  function formatarDataHoraParaBanco(dataTexto, horaTexto) {
+    const dataHora = new Date(`${dataTexto}T${horaTexto}:00`);
+    if (Number.isNaN(dataHora.getTime())) {
+      return null;
+    }
+
+    const ano = dataHora.getFullYear();
+    const mes = String(dataHora.getMonth() + 1).padStart(2, '0');
+    const dia = String(dataHora.getDate()).padStart(2, '0');
+    const horas = String(dataHora.getHours()).padStart(2, '0');
+    const minutos = String(dataHora.getMinutes()).padStart(2, '0');
+    const segundos = String(dataHora.getSeconds()).padStart(2, '0');
+
+    return `${ano}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+  }
+
   useEffect(() => {
     async function carregarJogos() {
       try {
@@ -40,8 +56,8 @@ export default function NovaPartida({ navigation }) {
         const lista = Array.isArray(dados) ? dados : [];
         setJogos(lista);
 
-        if (lista.length > 0 && !jogoId) {
-          setJogoId(String(lista[0].id));
+        if (lista.length > 0) {
+          setJogoId((jogoAtual) => jogoAtual || String(lista[0].id));
         }
       } catch {
         setErro('Não foi possível carregar a lista de jogos.');
@@ -49,7 +65,7 @@ export default function NovaPartida({ navigation }) {
     }
 
     void carregarJogos();
-  }, [jogoId]);
+  }, []);
 
   function validar() {
     if (!titulo.trim() || titulo.trim().length < 3) {
@@ -96,7 +112,11 @@ export default function NovaPartida({ navigation }) {
 
     try {
       const token = await AsyncStorage.getItem('gamehub_token');
-      const dataHoraISO = new Date(`${data}T${hora}:00`).toISOString();
+      const matchDate = formatarDataHoraParaBanco(data, hora);
+
+      if (!matchDate) {
+        throw new Error('Data e hora inválidas para criar a partida.');
+      }
 
       const resposta = await fetch(API + '/api/matches', {
         method: 'POST',
@@ -108,7 +128,7 @@ export default function NovaPartida({ navigation }) {
           title: titulo.trim(),
           description: descricao.trim(),
           game_id: Number(jogoId),
-          match_date: dataHoraISO,
+          match_date: matchDate,
           max_players: Number(maxJogadores),
         }),
       });

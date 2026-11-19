@@ -1,5 +1,24 @@
 import pool from '../database/conexao.js';
 
+function normalizarDataPartida(valor) {
+  if (typeof valor !== 'string') {
+    return null;
+  }
+
+  const texto = valor.trim();
+  if (!texto) {
+    return null;
+  }
+
+  const data = new Date(texto);
+  if (Number.isNaN(data.getTime())) {
+    return null;
+  }
+
+  const pad = (numero) => String(numero).padStart(2, '0');
+  return `${data.getFullYear()}-${pad(data.getMonth() + 1)}-${pad(data.getDate())} ${pad(data.getHours())}:${pad(data.getMinutes())}:${pad(data.getSeconds())}`;
+}
+
 export async function listarPartidas(req, res) {
   try {
     const usuarioId = Number(req.usuario?.id || 0);
@@ -75,6 +94,7 @@ export async function criarPartida(req, res) {
   const descricao = typeof description === 'string' ? description.trim() : '';
   const jogoId = Number(game_id);
   const maximo = Number(max_players);
+  const matchDate = normalizarDataPartida(match_date);
 
   if (!titulo || titulo.length < 3 || titulo.length > 120) {
     return res.status(400).json({ mensagem: 'O título da partida deve ter entre 3 e 120 caracteres.' });
@@ -84,7 +104,7 @@ export async function criarPartida(req, res) {
     return res.status(400).json({ mensagem: 'ID do jogo inválido.' });
   }
 
-  if (!match_date || Number.isNaN(new Date(match_date).getTime())) {
+  if (!matchDate || Number.isNaN(new Date(match_date).getTime())) {
     return res.status(400).json({ mensagem: 'Informe uma data válida para a partida.' });
   }
 
@@ -100,7 +120,7 @@ export async function criarPartida(req, res) {
 
     const [resultado] = await pool.execute(
       'INSERT INTO matches (title, description, game_id, creator_id, match_date, max_players, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [titulo, descricao, jogoId, req.usuario.id, match_date, maximo, 'aberta']
+      [titulo, descricao, jogoId, req.usuario.id, matchDate, maximo, 'aberta']
     );
 
     await pool.execute(
@@ -116,7 +136,7 @@ export async function criarPartida(req, res) {
         description: descricao,
         game_id: jogoId,
         creator_id: req.usuario.id,
-        match_date,
+        match_date: matchDate,
         max_players: maximo,
         status: 'aberta',
       },
@@ -146,7 +166,7 @@ export async function atualizarPartida(req, res) {
     const descricao = typeof req.body.description === 'string' ? req.body.description.trim() : partida[0].description;
     const jogoId = Number.isInteger(Number(req.body.game_id)) ? Number(req.body.game_id) : Number(partida[0].game_id);
     const status = ['aberta', 'em_andamento', 'encerrada'].includes(req.body.status) ? req.body.status : partida[0].status;
-    const matchDate = typeof req.body.match_date === 'string' ? req.body.match_date : partida[0].match_date;
+    const matchDate = normalizarDataPartida(req.body.match_date) || partida[0].match_date;
     const maximo = Number.isInteger(Number(req.body.max_players)) ? Number(req.body.max_players) : Number(partida[0].max_players);
 
     if (!titulo || titulo.length < 3 || titulo.length > 120) {

@@ -44,7 +44,10 @@ export default function Login({ navigation, aoEntrar }) {
       await AsyncStorage.setItem('gamehub_token', dados.token);
       aoEntrar(dados.usuario);
     } catch (falha) {
-      setErro(falha.message || 'Não foi possível entrar no GameHub.');
+      const mensagem = falha?.message || 'Não foi possível entrar no GameHub.';
+      setErro(mensagem.includes('fetch') || mensagem.includes('Failed to fetch') || mensagem.includes('Network')
+        ? 'Não foi possível conectar com o servidor. Verifique se a API está rodando e se o endereço em services/api.js está correto.'
+        : mensagem);
     } finally {
       setEnviando(false);
     }

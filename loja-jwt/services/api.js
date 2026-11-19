@@ -1,9 +1,13 @@
-// fetch é nativo: não precisamos de Axios para conversar com a API REST.
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Em celular físico, troque pelo IP do computador na rede local.
-// Exemplo: http://192.168.0.20:3000
-export const API = 'http://localhost:3000';
+const URL_API_PADRAO = 'http://localhost:3000';
+const URL_API_ANDROID = 'http://10.0.2.2:3000';
+const URL_API_AMBIENTE = typeof process !== 'undefined' && process.env
+  ? (process.env.EXPO_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '')
+  : '';
+
+export const API = (URL_API_AMBIENTE || (Platform.OS === 'android' ? URL_API_ANDROID : URL_API_PADRAO)).replace(/\/$/, '');
 
 let avisarSessaoExpirada = null;
 

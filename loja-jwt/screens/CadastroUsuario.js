@@ -60,7 +60,10 @@ export default function CadastroUsuario({ navigation }) {
       setSenha('');
       setConfirmacao('');
     } catch (falha) {
-      setErro(falha.message || 'Não foi possível criar a conta.');
+      const mensagem = falha?.message || 'Não foi possível criar a conta.';
+      setErro(mensagem.includes('fetch') || mensagem.includes('Failed to fetch') || mensagem.includes('Network')
+        ? 'Não foi possível conectar com o servidor. Verifique se a API está rodando e se o endereço em services/api.js está correto.'
+        : mensagem);
     } finally {
       setEnviando(false);
     }
